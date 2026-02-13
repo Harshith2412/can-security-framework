@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAN Bus Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+    console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+</script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🛡️ CAN Bus Security Framework</h1>
+                    <p class="subtitle">Real-Time Intrusion Detection & Prevention</p>
+                </div>
+                <div class="status-indicators">
+                    <div class="status-item">
+                        <span class="status-label">System:</span>
+                        <span id="system-status" class="status-badge status-inactive">INACTIVE</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Uptime:</span>
+                        <span id="uptime" class="status-value">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container main-content">
+        
+        <!-- Control Panel -->
+        <section class="control-panel">
+            <h2>Control Panel</h2>
+            <div class="controls">
+                <button id="btn-start" class="btn btn-success">▶ Start System</button>
+                <button id="btn-stop" class="btn btn-danger">⏹ Stop System</button>
+                <button id="btn-reset" class="btn btn-warning">🔄 Reset Stats</button>
+                
+                <div class="attack-controls">
+                    <span class="control-label">Simulate Attack:</span>
+                    <button class="btn btn-attack" data-attack="dos">DoS</button>
+                    <button class="btn btn-attack" data-attack="fuzzing">Fuzzing</button>
+                    <button class="btn btn-attack" data-attack="spoofing">Spoofing</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Cards -->
+        <section class="stats-grid">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-processed">0</div>
+                    <div class="stat-label">Messages Processed</div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-success">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-allowed">0</div>
+                    <div class="stat-label">Allowed</div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-danger">
+                <div class="stat-icon">🚫</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-blocked">0</div>
+                    <div class="stat-label">Blocked</div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-block-rate">0%</div>
+                    <div class="stat-label">Block Rate</div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-info">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-latency">0.00</div>
+                    <div class="stat-label">Avg Latency (ms)</div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-info">
+                <div class="stat-icon">📉</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-p95">0.00</div>
+                    <div class="stat-label">P95 Latency (ms)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-row">
+            <div class="chart-container">
+                <h3>Message Rate (msg/s)</h3>
+                <canvas id="chart-message-rate"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>Block Rate (blocks/s)</h3>
+                <canvas id="chart-block-rate"></canvas>
+            </div>
+        </section>
+
+        <!-- Second Charts Row -->
+        <section class="charts-row">
+            <div class="chart-container">
+                <h3>Attack Types Distribution</h3>
+                <canvas id="chart-attack-types"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>Top CAN IDs</h3>
+                <canvas id="chart-can-ids"></canvas>
+            </div>
+        </section>
+
+        <!-- Latency Chart -->
+        <section class="chart-full">
+            <div class="chart-container">
+                <h3>Processing Latency (Recent 100 Messages)</h3>
+                <canvas id="chart-latency"></canvas>
+            </div>
+        </section>
+
+        <!-- Message Tables -->
+        <section class="tables-row">
+            <div class="table-container">
+                <h3>Recent Messages (Last 20)</h3>
+                <div class="table-wrapper">
+                    <table id="table-messages">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>CAN ID</th>
+                                <th>DLC</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="no-data">No data yet. Start the system to begin monitoring.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>Recent Blocks (Last 20)</h3>
+                <div class="table-wrapper">
+                    <table id="table-blocks">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>CAN ID</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" class="no-data">No blocks yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 CAN Bus Security Framework | Developed by Harshith | Northeastern University</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
