@@ -39,3 +39,5 @@ joblib>=1.2.0
 
 # Type hints
 typing-extensions>=4.5.0
+urllib3>=2.8.0 # not directly required, pinned by Snyk to avoid a vulnerability
+werkzeug>=3.1.9 # not directly required, pinned by Snyk to avoid a vulnerability
