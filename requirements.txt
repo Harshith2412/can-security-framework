@@ -39,3 +39,4 @@ joblib>=1.2.0
 
 # Type hints
 typing-extensions>=4.5.0
+tornado>=6.5.9 # not directly required, pinned by Snyk to avoid a vulnerability
